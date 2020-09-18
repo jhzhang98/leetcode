@@ -35,10 +35,11 @@ public class SubstringWithConcatenationOfAllWords {
 
             if (!haveASequence) {
                 sequenceStart = wordStart;
-
+                break;
             } else {
-                if (wordStart != currentStart + words[0].length())
+                if (wordStart != currentStart + words[0].length());
             }
         }
+        return null;
     }
 }
