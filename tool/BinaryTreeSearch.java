@@ -10,7 +10,7 @@ public class BinaryTreeSearch {
         StringBuilder result = new StringBuilder();
         while(!queue.isEmpty()){
             TreeNode node = queue.poll();
-            result.append(node.val);
+            result.append("" + node.val + ", ");
             if (node.left != null)
                 queue.add(node.left);
             if (node.right != null)
