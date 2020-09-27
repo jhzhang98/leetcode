@@ -1,16 +1,36 @@
 package tool;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import sun.reflect.generics.tree.Tree;
+
+import java.util.*;
 
 public class BinaryTreeSearch {
-    public void BFS(TreeNode root){
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.add(root);
+
+    public void DFS(TreeNode root) {
+        Stack<TreeNode> stack = new Stack<>();
+//        Set<TreeNode> searched = new HashSet<>();
+        if (root != null)
+            stack.add(root);
         StringBuilder result = new StringBuilder();
-        while(!queue.isEmpty()){
+        while (!stack.isEmpty()) {
+            TreeNode node = stack.pop();
+            result.append(node.val).append(", ");
+            if (node.right != null)
+                stack.add(node.right);
+            if (node.left != null)
+                stack.add(node.left);
+        }
+        System.out.println(result);
+    }
+
+    public void BFS(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        if (root != null)
+            queue.add(root);
+        StringBuilder result = new StringBuilder();
+        while (!queue.isEmpty()) {
             TreeNode node = queue.poll();
-            result.append("" + node.val + ", ");
+            result.append(node.val).append(", ");
             if (node.left != null)
                 queue.add(node.left);
             if (node.right != null)
