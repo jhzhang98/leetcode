@@ -11,8 +11,8 @@ public class PopulatingNextRightPointersInEachNodeII {
         root.next = null;
         if (root.right != null && root.left != null)
             root.left.next = root.right;
-        fillChild(root.left);
         fillChild(root.right);
+        fillChild(root.left);
         return root;
     }
 
@@ -22,26 +22,28 @@ public class PopulatingNextRightPointersInEachNodeII {
         // 1. 更新左节点Next
         if (root.right != null && root.left != null)     // 左右子节点都非空，左节点指向右节点
             root.left.next = root.right;
-        else if (root.left != null) {                   // 右节点为空，左节点指向父节点next的子节点
-            Node rootNext = root.next;
+        else if (root.left != null) {                   // 右节点为空，寻找父节点next路径下不为空的节点，指向其子节点
+            Node rootNext = root;
+            do {
+                rootNext = rootNext.next;
+            } while (rootNext != null && rootNext.left == null && rootNext.right == null);
             if (rootNext != null) {
-                while(rootNext.next != null)
-                    rootNext = rootNext.next;
                 if (rootNext.left != null)
                     root.left.next = rootNext.left;
-                else if (rootNext.right != null)
+                else
                     root.left.next = rootNext.right;
             }
         }
         // 2. 更新右节点
         if (root.right != null) {
-            Node rootNext = root.next;                   // 右节点非空，右节点指向父节点next的子节点
+            Node rootNext = root;                   // 右节点非空，寻找父节点next路径下不为空的节点，指向其子节点
+            do {
+                rootNext = rootNext.next;
+            } while (rootNext != null && rootNext.left == null && rootNext.right == null);
             if (rootNext != null) {
-                while(rootNext.next != null)
-                    rootNext = rootNext.next;
                 if (rootNext.left != null)
                     root.right.next = rootNext.left;
-                else if (rootNext.right != null)
+                else
                     root.right.next = rootNext.right;
             }
         }
