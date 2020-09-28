@@ -1,6 +1,6 @@
 package tool;
 
-public class TreeNode {
+public class TreeNode extends Node {
     public int val;
     public TreeNode left;
     public TreeNode right;

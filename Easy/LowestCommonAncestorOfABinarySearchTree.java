@@ -6,42 +6,44 @@ import java.util.*;
 
 public class LowestCommonAncestorOfABinarySearchTree {
     public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        Map<TreeNode, TreeNode> getParents = new HashMap<>();
         Queue<TreeNode> queue = new LinkedList<>();
-        if (root != null)
-            queue.add(root);
-        List<TreeNode> tree = new LinkedList<>();
-        tree.add(root);
-        int pIndex = -1, qIndex = -1;
+        queue.add(root);
+        getParents.put(root, null);
+        TreeNode pPointer = null, qPointer = null;
+
         while (!queue.isEmpty()) {
             TreeNode node = queue.poll();
-            if (pIndex == -1 && node.val == p.val)
-                pIndex = tree.indexOf(node);
-            else if (qIndex == -1 && node.val == q.val)
-                qIndex = tree.indexOf(node);
-            if (qIndex != -1 && pIndex != -1)
+
+            if (pPointer == null && node.val == p.val)
+                pPointer = node;
+            else if (qPointer == null && node.val == q.val)
+                qPointer = node;
+            if (pPointer != null && qPointer != null)
                 break;
-            tree.add(node.left);
-            tree.add(node.right);
-            if (node.left != null)
+
+            if (node.left != null) {
                 queue.add(node.left);
-            if (node.right != null)
+                getParents.put(node.left, node);
+            }
+            if (node.right != null) {
                 queue.add(node.right);
+                getParents.put(node.right, node);
+            }
         }
 
-        Set<Integer> pParent = new HashSet<>();
-        int i = 2 * pIndex + 1;
+        Set<Integer> pParents = new HashSet<>();
+        TreeNode tmp = pPointer;
         do {
-            i = (i - 1) / 2;
-            pParent.add(tree.get(i).val);
-        } while (i != 0);
-
-        for (i = qIndex; i >= 0; i = (i - 1) / 2) {
-            TreeNode qParent = tree.get(i);
-            if (pParent.contains(qParent.val))
-                return qParent;
-            if (i == 0)
-                break;
-        }
+            pParents.add(tmp.val);
+            tmp = getParents.get(tmp);
+        } while (tmp != null);
+        tmp = qPointer;
+        do {
+            if (pParents.contains(tmp.val))
+                return tmp;
+            tmp = getParents.get(tmp);
+        } while (tmp != null);
 
         return null;
     }
@@ -50,6 +52,6 @@ public class LowestCommonAncestorOfABinarySearchTree {
     public static void main(String[] args) {
         LowestCommonAncestorOfABinarySearchTree tree = new LowestCommonAncestorOfABinarySearchTree();
         TreeNode root = new TreeNode(6, new TreeNode(2, new TreeNode(0), new TreeNode(4, new TreeNode(3), new TreeNode(5))), new TreeNode(8, new TreeNode(7), new TreeNode(9)));
-        System.out.println(tree.lowestCommonAncestor(root, new TreeNode(3), new TreeNode(2)));
+        System.out.println(tree.lowestCommonAncestor(root, new TreeNode(2), new TreeNode(8)));
     }
 }
