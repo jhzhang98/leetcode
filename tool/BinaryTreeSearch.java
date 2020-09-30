@@ -20,6 +20,22 @@ public class BinaryTreeSearch {
         System.out.println(result);
     }
 
+    public void DFS(TreeNode root) {
+        Stack<TreeNode> stack = new Stack<>();
+        if (root != null)
+            stack.add(root);
+        StringBuilder result = new StringBuilder();
+        while (!stack.isEmpty()) {
+            TreeNode node = stack.pop();
+            result.append(node.val).append(", ");
+            if (node.right != null)
+                stack.add(node.right);
+            if (node.left != null)
+                stack.add(node.left);
+        }
+        System.out.println(result);
+    }
+
     public void BFS(Node root) {
         Queue<Node> queue = new LinkedList<>();
         if (root != null)
@@ -27,6 +43,22 @@ public class BinaryTreeSearch {
         StringBuilder result = new StringBuilder();
         while (!queue.isEmpty()) {
             Node node = queue.poll();
+            result.append(node.val).append(", ");
+            if (node.left != null)
+                queue.add(node.left);
+            if (node.right != null)
+                queue.add(node.right);
+        }
+        System.out.println(result);
+    }
+
+    public void BFS(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        if (root != null)
+            queue.add(root);
+        StringBuilder result = new StringBuilder();
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
             result.append(node.val).append(", ");
             if (node.left != null)
                 queue.add(node.left);
