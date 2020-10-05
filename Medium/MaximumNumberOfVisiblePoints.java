@@ -17,28 +17,31 @@ public class MaximumNumberOfVisiblePoints {
             double deltaY = pY - posY;
             if (-1e-6 < deltaX && deltaX < 1e-6 && -1e-6 < deltaY && deltaY < 1e-6) {
                 visiblePoints++;
-            } else if (deltaX > 0 && deltaY >= 0) {
+            } else if (deltaX >= 0 && deltaY >= 0) {
                 degree.add(Math.atan(deltaY / deltaX));
                 degree.add(Math.atan(deltaY / deltaX) + 2 * Math.PI);
-            } else if (deltaX > 0 && deltaY < 0) {
+            } else if (deltaX >= 0 && deltaY < 0) {
                 degree.add(Math.atan(deltaY / deltaX) + 2 * Math.PI);
-            } else if (deltaX < 0 && deltaY <= 0) {
+            } else if (deltaX <= 0 && deltaY <= 0) {
                 degree.add(Math.atan(deltaY / deltaX) + Math.PI);
-            } else if (deltaX < 0 && deltaY > 0) {
+            } else if (deltaX <= 0 && deltaY > 0) {
                 degree.add(Math.atan(deltaY / deltaX) + Math.PI);
                 degree.add(Math.atan(deltaY / deltaX) + 3 * Math.PI);
-            } else{
+            } else {
                 System.out.println("leak !!!!!");
             }
         }
         Collections.sort(degree);
         int localVisible = 0;
+        int lastEnd = 0;
         for (int i = 0; i < degree.size(); i++) {
             int visiblePointsWindow = 0;
-            for (int j = i; j < degree.size(); j++) {
-                if (degree.get(j) - degree.get(i) > anglePI)
+            for (int j = lastEnd; j < degree.size(); j++) {
+                if (degree.get(j) - degree.get(i) > anglePI) {
+                    lastEnd = j;
                     break;
-                visiblePointsWindow++;
+                }
+                visiblePointsWindow = j - i + 1;
             }
             localVisible = Math.max(localVisible, visiblePointsWindow);
         }
