@@ -40,8 +40,14 @@ public class OnesAndZeroes {
                     if (ones[k] <= i && zeros[k] <= j) {      // 可以判断找到上一个状态
                         int x = i - ones[k];
                         int y = j - zeros[k];
-                        if (strIndex.get(x).get(y).contains(k))   // 如果上一个状态已经拿过这个字符串，next
+                        if (strIndex.get(x).get(y).contains(k)) {   // 如果上一个状态已经拿过这个字符串，next
+                            if (dp[x][y] > dp[i][j]) {      // 如果全都拿过，保留一个最大的
+                                strIndex.get(i).get(j).addAll(strIndex.get(x).get(y));
+                                dp[i][j] = dp[x][y];
+                            }
                             continue;
+                        }
+                        // 如果没拿过，保存一个最大的
                         int num = dp[x][y] + 1;
                         if (num > maxNum) {
                             maxNum = num;
@@ -49,8 +55,10 @@ public class OnesAndZeroes {
                         }
                     }
                 }
-                if (kIndex != -1) {
+                if (kIndex != -1 && maxNum > dp[i][j]) {
                     dp[i][j] = maxNum;
+                    strIndex.get(i).get(j).clear();
+                    strIndex.get(i).get(j).addAll(strIndex.get(i - ones[kIndex]).get(j - zeros[kIndex]));
                     strIndex.get(i).get(j).add(kIndex);
                 }
             }
