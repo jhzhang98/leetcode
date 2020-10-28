@@ -17,6 +17,8 @@ public class ListNode {
     }
 
     public ListNode(int[] vals) {
+        if (vals.length == 0)
+            return;
         this.val = vals[0];
         ListNode node = this;
         for (int i = 1; i < vals.length; i++) {
@@ -28,9 +30,9 @@ public class ListNode {
     @Override
     public String toString() {
         ListNode tmp = this;
-        String str = "";
+        StringBuilder str = new StringBuilder();
         while (tmp != null) {
-            str += tmp.val + "->";
+            str.append(tmp.val).append("->");
             tmp = tmp.next;
         }
         return str.substring(0, str.length() - 2);
