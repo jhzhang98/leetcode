@@ -6,13 +6,21 @@ import java.util.Set;
 
 public class IntersectionOfTwoArrays {
     public int[] intersection(int[] nums1, int[] nums2) {
-        Set<Integer> set1 = new HashSet<>();
-        for (int num : nums1)
-            set1.add(num);
-        Set<Integer> set2 = new HashSet<>();
-        for (int num : nums2)
-            set2.add(num);
-        set1.retainAll(set2);
-        return set1.stream().mapToInt(Integer::valueOf).toArray();
+        Arrays.sort(nums1);
+        Arrays.sort(nums2);
+        Set<Integer> set = new HashSet<>();
+        int index1 = 0, index2 = 0;
+        while (index1 < nums1.length && index2 < nums2.length) {
+            if (nums1[index1] == nums2[index2]) {
+                set.add(nums1[index1]);
+                index1++;
+                index2++;
+            } else if (nums1[index1] < nums2[index2])
+                index1++;
+            else
+                index2++;
+        }
+
+        return set.stream().mapToInt(Integer::valueOf).toArray();
     }
 }
