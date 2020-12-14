@@ -4,12 +4,14 @@ public class SuperEggDrop {
     public int superEggDrop(int K, int N) {
         if (K == 1)
             return N;
-        else if (N <= 2)
+        else if (N == 1)
             return 1;
+        else if (N == 2)
+            return 2;
         if (N % 2 == 1)
-            return 1+  Math.max(superEggDrop(K - 1, N / 2), superEggDrop(K, N / 2));
+            return 1 + Math.max(superEggDrop(K - 1, N / 2 - 1), superEggDrop(K, N / 2));
         else
-            return 1 + Math.max(superEggDrop(K - 1, N / 2 - 1), superEggDrop(K, N / 2 + 1));
+            return 1 + Math.max(superEggDrop(K - 1, N / 2 - 2), superEggDrop(K, N / 2 + 1));
     }
 
     public static void main(String[] args) {
