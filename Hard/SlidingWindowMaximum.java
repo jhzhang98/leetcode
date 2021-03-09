@@ -1,35 +1,35 @@
 package Hard;
 
-import java.util.Arrays;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class SlidingWindowMaximum {
     public int[] maxSlidingWindow(int[] nums, int k) {
-        // num[0]: num, num[1]: index
-        PriorityQueue<int[]> queue = new PriorityQueue<>((o1, o2) -> o1[0] == o2[0] ? o1[1] - o2[1] : o2[0] - o1[0]);
-        for (int i = 0; i < k; i++)
-            queue.add(new int[]{nums[i], i});
+        List<Integer> wind = new ArrayList<>();
         int[] res = new int[nums.length - k + 1];
-        res[0] = queue.peek()[0];
-
-        for (int i = 0; i < res.length; i++) {
-            while (queue.peek()[1] >= i + k || queue.peek()[1] < i)
-                queue.poll();
-            if (queue.peek()[0] == nums[i])
-                res[i] = queue.poll()[0];
-            else
-                res[i] = queue.peek()[0];
-            if (i + k < nums.length)
-                queue.add(new int[]{nums[i + k], i + k});
+        int max = Integer.MIN_VALUE;
+        for (int i = k - 1; i >= 0; i--) {
+            wind.add(0, Math.max(max, nums[i]));
+            max = Math.max(max, nums[i]);
         }
-
+        res[0] = wind.get(0);
+        for (int i = 1; i < res.length; i++) {
+            wind.remove(0);
+            max = nums[i + k - 1];
+            int removeNum = 1;
+            while (wind.size() > 0 && wind.get(wind.size() - 1) < max) {
+                wind.remove(wind.size() - 1);
+                removeNum++;
+            }
+            while (removeNum-- > 0)
+                wind.add(max);
+            res[i] = wind.get(0);
+        }
         return res;
     }
 
     public static void main(String[] args) {
-        SlidingWindowMaximum maximum = new SlidingWindowMaximum();
-        int[] nums = {4, -2};
-        int k = 2;
-        System.out.println(Arrays.toString(maximum.maxSlidingWindow(nums, k)));
+        int[] nums = {1, 3, -1, -3, 5, 3, 6, 7};
+        int k = 3;
+        System.out.println(Arrays.toString(new SlidingWindowMaximum().maxSlidingWindow(nums, k)));
     }
 }
