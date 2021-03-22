@@ -9,9 +9,9 @@ public class Q34 {
 
     private void dfs(List<Integer> curPath, int curSum, int target, TreeNode node) {
         if (node == null)
-            return;
-        if (curSum + node.val == target) {
-            if (node.right == null && node.left == null) {
+            return ;
+        if (node.left == null && node.right == null) {
+            if (curSum + node.val == target) {
                 curPath.add(node.val);
                 res.add(curPath);
             }
