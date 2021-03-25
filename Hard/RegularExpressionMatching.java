@@ -1,62 +1,47 @@
 package Hard;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class RegularExpressionMatching {
-
-    private boolean matchesOneChar(String c, String p) {
-        if (c.length() == 1) {   // 如果c是一个字符，p无论是一个长还是两个长，都只用看第一个符号
-            if(p.charAt(0) == '.')
-                return true;
-            else
-                return c.charAt(0) == p.charAt(0);
-        }else if (c.length() == 0 ){    // 如果c是空串，直接看p是否有*
-            return p.length() == 2;
+    public boolean isMatch(String s, String p) {
+        Set<Integer> nextLegalState = new HashSet<>();
+        nextState(p, 0, nextLegalState);
+        int sIndex = 0;
+        while (!nextLegalState.isEmpty()) {
+            Set<Integer> curLegalState = nextLegalState;
+            nextLegalState = new HashSet<>();
+            for (int pIndex : curLegalState) {
+                if (pIndex >= p.length() && sIndex >= s.length())
+                    return true;
+                else if (pIndex >= p.length())  // 由于可能添加超过p.length()的非法坐标，这里要判断一下
+                    continue;
+                if (sIndex >= s.length())
+                    continue;       // 这里不能用break，因为可能存在某个pIndex也大于等于p.length，以至于返回true
+                char c = p.charAt(pIndex);
+                if (c == '.' || c == s.charAt(sIndex)) {
+                    if (pIndex + 1 < p.length() && p.charAt(pIndex + 1) == '*')
+                        nextState(p, pIndex, nextLegalState);   // 如果下一个是*，那么当前位置的next状态都合法，重复添加一遍
+                    else
+                        nextState(p, pIndex + 1, nextLegalState); // 如果下一个不是*，那么应该添加下一个位置的next合法位置
+                }
+            }
+            sIndex++;
         }
-
+        // 没有判断出终止状态，直接结束
         return false;
     }
 
-    // 一个正则符号一个正则符号匹配，对于.*或a*视为一个正则符号
-    private void matchNext(String s, int sStart, int sEnd, String[] pSet, int pIndex, int[] pSetMatches) {
-        while(true){
-            String c = s.substring(sStart, sEnd);
-            boolean matches = matchesOneChar(c, pSet[pIndex]);
-            if (matches)
-
-            if (c.length() == 0){
-
-            }
+    private void nextState(String p, int curState, Set<Integer> states) {
+        states.add(curState); // 这里允许添加超过p.length()的位置，目的是可以直接通过state来判断p已经结束
+        if (curState + 1 < p.length()) {
+            if (p.charAt(curState + 1) == '*')
+                nextState(p, curState + 2, states);
         }
-    }
-
-    public boolean isMatch(String s, String p) {
-        String[] pSet = initP(p);
-        int[] pSetMatches = new int[pSet.length];   // 每个正则符号匹配了多少个元素
-        matchNext(s, 0, 0, pSet, 0, pSetMatches);
-        return true;
-    }
-
-    private String[] initP(String p) {
-        List<String> pSet = new ArrayList<>();
-        for (int i = 0; i < p.length(); i++) {
-            if (i + 1 < p.length() && p.charAt(i + 1) == '*') {
-                pSet.add(p.substring(i, i + 2));
-                i++;
-            } else
-                pSet.add(p.substring(i, i + 1));
-        }
-        String[] res = new String[pSet.size()];
-        for (int i = 0; i < res.length; i++)
-            res[i] = pSet.get(i);
-        return res;
     }
 
     public static void main(String[] args) {
         RegularExpressionMatching matching = new RegularExpressionMatching();
-        System.out.println(Arrays.toString(matching.initP("a.*.*abc*.")));
+        System.out.println(matching.isMatch("abcdefccd", "ab.*ccd"));
 //        System.out.println("ac".substring(0, 0));
     }
 }
