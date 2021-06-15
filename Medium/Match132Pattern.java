@@ -1,7 +1,5 @@
 package Medium;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
-
 import java.util.Stack;
 
 public class Match132Pattern {
@@ -11,28 +9,22 @@ public class Match132Pattern {
         minArrayLeft[0] = nums[0];
         for (int i = 1; i < nums.length; i++)
             minArrayLeft[i] = Math.min(nums[i], minArrayLeft[i - 1]);
-        int[] minArrayRight = new int[nums.length];
-        minArrayRight[nums.length - 1] = nums[nums.length - 1];
-        for (int i = nums.length - 2; i >= 0; i--)
-            minArrayRight[i] = Math.min(nums[i], minArrayRight[i + 1]);
 
-        int index = 1;
-        while (index < nums.length) {
-            if (nums[index] > minArrayLeft[index]) {
-                while (index < nums.length) {
-                    if (nums[index] > minArrayRight[index] && minArrayRight[index] > minArrayLeft[index])
-                        return true;
-                    index++;
-                }
-            } else {
-                index++;
-            }
+        Stack<Integer> stack = new Stack<>();
+        stack.add(nums[nums.length - 1]);
+        for (int i = nums.length - 2; i >= 1; i--) {
+            int bigger = Integer.MIN_VALUE;
+            while (!stack.isEmpty() && stack.peek() < nums[i])
+                bigger = stack.pop();
+            if (nums[i] > bigger && bigger > minArrayLeft[i])
+                return true;
+            stack.add(nums[i]);
         }
         return false;
     }
 
     public static void main(String[] args) {
-        int[] nums = {3, 5, 0, 3, 4};
+        int[] nums = {1, 4, 0, -1, -2, -3, -1, -2};
         System.out.println(new Match132Pattern().find132pattern(nums));
     }
 }
