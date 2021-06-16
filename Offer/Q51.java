@@ -1,26 +1,53 @@
 package Offer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-
 public class Q51 {
     public int reversePairs(int[] nums) {
-        if (nums.length == 0)
-            return 0;
-        PriorityQueue<Integer> queue = new PriorityQueue<>();
-        queue.add(nums[0]);
-        int res = 0;
-        List<Integer> tmpSave = new ArrayList<>();
-        for (int i = 1; i < nums.length; i++) {
-            while (!queue.isEmpty() && queue.peek() <= nums[i])
-                tmpSave.add(queue.poll());
-            res += queue.size();
-            queue.addAll(tmpSave);
-            queue.add(nums[i]);
-            tmpSave.clear();
+        if (nums.length == 0) return 0;
+        return merge(nums, 0, nums.length - 1);
+    }
+
+    private int merge(int[] nums, int start, int end) {
+        if (end - start == 0) return 0;
+        int mid = (start + end) >> 1;
+        int num1 = merge(nums, start, mid);
+        int num2 = merge(nums, mid + 1, end);
+
+        //count part
+        int left = start, right = mid + 1;
+        int num3 = 0;
+        while (left <= mid && right <= end) {
+            if (nums[left] > nums[right]) {
+                num3 += end - right + 1;
+                left++;
+            } else {
+                right++;
+            }
         }
-        return res;
+
+        //sort part
+        int[] res = new int[end - start + 1];
+        int index = start;
+        left = start;
+        right = mid + 1;
+        while (left <= mid && right <= end) {
+            if (nums[left] < nums[right]) {
+                res[index - start] = nums[right];
+                right++;
+            } else {
+                res[index - start] = nums[left];
+                left++;
+            }
+            index++;
+        }
+
+        while (left <= mid)
+            res[index++ - start] = nums[left++];
+        while (right <= end)
+            res[index++ - start] = nums[right++];
+        for (int i = start; i <= end; i++)
+            nums[i] = res[i - start];
+
+        return num1 + num2 + num3;
     }
 
     public static void main(String[] args) {
