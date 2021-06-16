@@ -7,51 +7,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ConstructBinaryTreeFromPreorderAndInorderTraversal {
-    int[] preorder, inorder;
-    Map<Integer, Integer> map = new HashMap<>();
-
     public TreeNode buildTree(int[] preorder, int[] inorder) {
-        if (preorder.length == 0)
-            return null;
-        this.preorder = preorder;
-        this.inorder = inorder;
-        for (int i = 0; i < preorder.length; i++)
-            map.put(preorder[i], i);
-
-        TreeNode root = new TreeNode(preorder[0]);
-        int rootIndex = 0;
-        for (; rootIndex < inorder.length; rootIndex++) {
-            if (inorder[rootIndex] == preorder[0])
-                break;
-        }
-        root.left = findRoot(0, rootIndex);
-        root.right = findRoot(rootIndex + 1, inorder.length);
+        if (preorder.length == 0) return null;
+        TreeNode root = findRoot(preorder, 0, preorder.length - 1, inorder, 0, inorder.length - 1);
         return root;
     }
 
-    private TreeNode findRoot(int left, int right) {
-        if (right <= left)
-            return null;
-
-        int rootIndex = -1, minRootInPreorder = Integer.MAX_VALUE;
-        for (int i = left; i < right; i++) {
-            if (map.get(inorder[i]) < minRootInPreorder) {
-                minRootInPreorder = map.get(inorder[i]);
-                rootIndex = i;
-            }
-        }
-        if (rootIndex == -1)
-            return null;
-        TreeNode node = new TreeNode(inorder[rootIndex]);
-        node.left = findRoot(left, rootIndex);
-        node.right = findRoot(rootIndex + 1, right);
-        return node;
+    private TreeNode findRoot(int[] preorder, int pStart, int pEnd, int[] inorder, int iStart, int iEnd) {
+        if (pStart > pEnd || iStart > iEnd) return null;
+        if (pStart == pEnd) return new TreeNode(preorder[pStart]);
+        TreeNode root = new TreeNode(preorder[pStart]);
+        int iRootIndex = findIndex(inorder, iStart, root.val);
+        if (iRootIndex > iStart)    // 说明有左子树
+            root.left = findRoot(preorder, pStart + 1, pStart + (iRootIndex - iStart), inorder, iStart, iRootIndex - 1);
+        if (iRootIndex < iEnd)  // 说明有右子树
+            root.right = findRoot(preorder, pStart + (iRootIndex - iStart) + 1, pEnd, inorder, iRootIndex + 1, iEnd);
+        return root;
     }
+
+    private int findIndex(int[] order, int start, int val) {
+        for (int i = start; i < order.length; i++) {
+            if (order[i] == val) return i;
+        }
+        return -1;
+    }
+
 
     public static void main(String[] args) {
         ConstructBinaryTreeFromPreorderAndInorderTraversal traversal = new ConstructBinaryTreeFromPreorderAndInorderTraversal();
-        int[] preorder = {1, 2, 3, 4};
-        int[] inorder = {4, 3, 2, 1};
+        int[] preorder = {3, 9, 20, 15, 7};
+        int[] inorder = {9, 3, 15, 20, 7};
         TreeNode root = traversal.buildTree(preorder, inorder);
         new BinaryTreeSearch().BFS(root);
     }

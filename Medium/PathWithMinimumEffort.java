@@ -1,114 +1,88 @@
 package Medium;
 
+import tool.Union;
+
 import java.util.*;
 
 public class PathWithMinimumEffort {
-    class Pos {
-        int x, y;
-
-        public Pos(int x, int y) {
-            this.x = x;
-            this.y = y;
+    /**
+     * 利用并查集，从最小的代价边开始添加，当添加边edge之后，发现起点和终点联通，结束
+     * 由于是从最小代价边开始添加的，所以当前就是最小联通路径
+     * 如何存储边信息？{sx, sy, tx, ty, cost}
+     * 如何构造并查集？
+     */
+    public int minimumEffortPath2(int[][] heights) {
+        int m = heights.length, n = heights[0].length;
+        if (m == n && n == 1)
+            return 0;
+        Union union = new Union(m * n);
+//        UnionFind union = new UnionFind(m * n);
+        List<int[]> edges = new ArrayList<>();
+        // 注意，只需要添加该节点右边和下边就可以无重复地添加完整个图的边
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i != m - 1)
+                    edges.add(new int[]{i, j, i + 1, j, Math.abs(heights[i][j] - heights[i + 1][j])});
+                if (j != n - 1)
+                    edges.add(new int[]{i, j, i, j + 1, Math.abs(heights[i][j] - heights[i][j + 1])});
+            }
         }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Pos pos = (Pos) o;
-            return x == pos.x &&
-                    y == pos.y;
+        edges.sort(Comparator.comparingInt(o -> o[4]));
+        int res = Integer.MIN_VALUE;
+        int src = 0, target = (m - 1) * n + n - 1;
+        for (int[] edge : edges) {
+            int x = edge[0], y = edge[1], nx = edge[2], ny = edge[3], cost = edge[4];
+            union.merge(n * x + y, n * nx + ny);
+            res = Math.max(res, cost);
+            if (union.connected(src, target)) break;
         }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y);
-        }
-
-        @Override
-        public String toString() {
-            return "{" +
-                    "x=" + x +
-                    ", y=" + y +
-                    '}';
-        }
+        return res;
     }
 
-    int minCost = Integer.MAX_VALUE >> 2;
-
-    /***
-     * 暴力搜索失败，路径情况太多，直接爆炸，无法运行结束
+    /**
+     * bfs + greedy
+     * 广搜很很好理解，但是问题是如何存储之前走过的路径，否则将会出现死循环
+     * 利用优先队列，对于每一个格子[x, y]而言，当前代价最小的永远会放到最前面，后面见到的代价都会大于等于之
+     * 没有证明，所以这个感觉不严谨
      */
     public int minimumEffortPath(int[][] heights) {
-        List<Pos> path = new LinkedList<>();
-        path.add(new Pos(0, 0));
-        dfs(heights, 0, 0, 0, path);
-        return minCost;
-    }
+        int m = heights.length, n = heights[0].length;
+        PriorityQueue<int[]> queue = new PriorityQueue<>(Comparator.comparingInt(o -> o[2]));
+        int[] cost = new int[m * n];
+        Arrays.fill(cost, Integer.MAX_VALUE);
+        cost[0] = 0;
+        boolean[] visited = new boolean[m * n];
+        queue.add(new int[]{0, 0, 0});
+        int[][] move = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        while (!queue.isEmpty()) {
+            int[] pos = queue.poll();
+            int x = pos[0], y = pos[1], curCost = pos[2];
+            if (visited[x * n + y])
+                continue;
+            visited[x * n + y] = true;
+            for (int[] mv : move) {
+                int nx = x + mv[0];
+                int ny = y + mv[1];
 
-    private void dfs(int[][] heights, int i, int j, int cost, List<Pos> path) {
-        if (i == heights.length - 1 && j == heights[0].length - 1) {
-            minCost = Math.min(cost, minCost);
-        } else {
-            if (i > 0 && !path.contains(new Pos(i - 1, j))) {
-                List<Pos> cp = new LinkedList<>(path);
-                cp.add(new Pos(i - 1, j));
-                dfs(heights, i - 1, j, Math.max(cost, Math.abs(heights[i][j] - heights[i - 1][j])), cp);
-            }
-            if (j > 0 && !path.contains(new Pos(i, j - 1))) {
-                List<Pos> cp = new LinkedList<>(path);
-                cp.add(new Pos(i, j - 1));
-                dfs(heights, i, j - 1, Math.max(cost, Math.abs(heights[i][j] - heights[i][j - 1])), cp);
-            }
-            if (i < heights.length - 1 && !path.contains(new Pos(i + 1, j))) {
-                List<Pos> cp = new LinkedList<>(path);
-                cp.add(new Pos(i + 1, j));
-                dfs(heights, i + 1, j, Math.max(cost, Math.abs(heights[i][j] - heights[i + 1][j])), cp);
-            }
-            if (j < heights[0].length - 1 && !path.contains(new Pos(i, j + 1))) {
-                List<Pos> cp = new LinkedList<>(path);
-                cp.add(new Pos(i, j + 1));
-                dfs(heights, i, j + 1, Math.max(cost, Math.abs(heights[i][j] - heights[i][j + 1])), cp);
+                if (nx < 0 || nx >= m || ny < 0 || ny >= n) continue;
+                int nCost = Math.max(Math.abs(heights[x][y] - heights[nx][ny]), curCost);
+                if (nCost <= cost[nx * n + ny]) {
+                    cost[nx * n + ny] = nCost;
+                    queue.add(new int[]{nx, ny, nCost});
+                }
             }
         }
-    }
-
-    /***
-     * dp[i][j] 是从0，0到i，j的最小代价
-     * if dp[i+1][j] 没有过值
-     *      dp[i+1][j] = Math.max(max(abs(dp[i][j] - dp[i+1][j]), dp[i][j]), dp[i+1][j])
-     * else
-     *      dp[i+1][j] = Math.min(max(abs(dp[i][j] - dp[i+1][j]), dp[i][j]), dp[i+1][j])
-     * 为了统一符号，直接将dp默认为最大值，这样就无论如何取最小
-     * 差和自己的代价中取大，然后和dp[i+1][j]取小
-     * 算法不对，先更新的点有可能是路径最后走到的，就无法再度更新
-     */
-    public int minimumEffortPathDp(int[][] heights) {
-        int[][] dp = new int[heights.length][heights[0].length];
-        for (int i = 0; i < dp.length; i++)
-            for (int j = 0; j < dp[0].length; j++)
-                dp[i][j] = Integer.MAX_VALUE >> 2;
-        dp[0][0] = 0;
-        for (int i = 0; i < dp.length; i++) {
-            for (int j = 0; j < dp[0].length; j++) {
-                if (i < dp.length - 1)
-                    dp[i + 1][j] = Math.min(Math.max(Math.abs(heights[i + 1][j] - heights[i][j]), dp[i][j]), dp[i + 1][j]);
-                if (j < dp[0].length - 1)
-                    dp[i][j + 1] = Math.min(Math.max(dp[i][j], Math.abs(heights[i][j + 1] - heights[i][j])), dp[i][j + 1]);
-                if (i > 0)
-                    dp[i - 1][j] = Math.min(Math.max(dp[i][j], Math.abs(heights[i - 1][j] - heights[i][j])), dp[i - 1][j]);
-                if (j > 0)
-                    dp[i][j - 1] = Math.min(Math.max(dp[i][j], Math.abs(heights[i][j - 1] - heights[i][j])), dp[i][j - 1]);
-            }
-        }
-        return dp[dp.length - 1][dp[0].length - 1];
+        return cost[m * n - 1];
     }
 
     public static void main(String[] args) {
         PathWithMinimumEffort effort = new PathWithMinimumEffort();
         int[][] heights = {{4, 3, 4, 10, 5, 5, 9, 2}, {10, 8, 2, 10, 9, 7, 5, 6}, {5, 8, 10, 10, 10, 7, 4, 2}, {5, 1, 3, 1, 1, 3, 1, 9}, {6, 4, 10, 6, 10, 9, 4, 6}};
 //        int[][] heights = {{1, 10, 6, 7, 9, 10, 4, 9}};
+//        int[][] heights = {{1, 2, 2}, {3, 8, 2}, {5, 3, 5}};
+//        int[][] heights = {{1, 2, 3}, {3, 8, 4}, {5, 3, 5}};
 //        int[][] heights = {{1, 2, 1, 1, 1}, {1, 2, 1, 2, 1}, {1, 2, 1, 2, 1}, {1, 2, 1, 2, 1}, {1, 1, 1, 2, 1}};
         System.out.println(effort.minimumEffortPath(heights));
+        System.out.println(effort.minimumEffortPath2(heights));
     }
 }
